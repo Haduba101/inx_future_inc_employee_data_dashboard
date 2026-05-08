@@ -7,7 +7,7 @@ import seaborn as sns
 st.set_page_config(page_title="INX Future Inc. Employee Data Dashboard", layout="wide")
 
 # Title
-st.title("INX Future Inc. Employee Data Dashboard")
+st.title("INX Future Inc. Employee Data Dashboard 📈")
 
 # Load data
 @st.cache_data
