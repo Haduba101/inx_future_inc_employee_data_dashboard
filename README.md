@@ -1,6 +1,6 @@
 # INX Future Inc. Employee Data Dashboard
 
-A Streamlit web application for visualizing and analyzing employee data from INX Future Inc. This dashboard provides insights into employee attrition, departmental distributions, age demographics, and salary analysis.
+A Streamlit web application for visualizing and analyzing employee data from INX Future Inc. This dashboard analyzes employee data and supports hiring and HR decisions by predicting employee performance ratings.
 
 ## Features
 

@@ -23,12 +23,19 @@ def load_data():
 
 @st.cache_data
 def load_model():
-    model_path = Path('xgb_model_pipeline.pkl')
-    if model_path.exists():
-        try:
-            return joblib.load(model_path)
-        except Exception:
-            return None
+    base_path = Path(__file__).resolve().parent
+    model_paths = [
+        base_path / 'xgb_model_pipeline.pkl',
+        base_path / 'xgb_model_pipeline.joblib',
+        Path('xgb_model_pipeline.pkl'),
+        Path('xgb_model_pipeline.joblib')
+    ]
+    for model_path in model_paths:
+        if model_path.exists():
+            try:
+                return joblib.load(model_path)
+            except Exception:
+                continue
     return None
 
 df = load_data()
