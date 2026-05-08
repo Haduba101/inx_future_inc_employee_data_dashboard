@@ -11,10 +11,7 @@ st.set_page_config(page_title="INX Future Inc. Employee Data Dashboard", layout=
 
 # Title
 st.title("INX Future Inc. Employee Data Dashboard 📈")
-st.markdown(
-    "This dashboard visualizes employee data for INX Future Inc. and includes a hiring-focused predictive model "
-    "for employee performance rating, aligned with the analysis in `inx_data.ipynb`."
-)
+
 
 # Load data
 @st.cache_data
