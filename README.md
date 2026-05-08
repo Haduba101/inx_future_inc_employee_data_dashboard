@@ -48,7 +48,7 @@ The app will open in your default web browser at `http://localhost:8501`.
 - `inx_data.ipynb`: Jupyter notebook with in-depth exploratory data analysis and predictive modeling.
 - Objective: analyze employee data and build a model to support hiring and HR decisions by predicting employee performance ratings.
 - Includes 10+ visualizations, correlation analysis, outlier detection, and model training for Logistic Regression, Random Forest, and XGBoost.
-- The notebook saves the production-ready XGBoost pipeline using `joblib` as `xgb_model_pipeline.pkl`.
+- The notebook saves the production-ready XGBoost pipeline using `joblib` as `xgb_model_pipeline.pkl` or `xgb_model_pipeline.joblib`.
 
 ## Data
 
@@ -65,4 +65,3 @@ The app will open in your default web browser at `http://localhost:8501`.
 - scikit-learn
 - xgboost
 - joblib
-- xgboost

@@ -1,3 +1,4 @@
+import sys
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -21,25 +22,33 @@ def load_data():
     df = pd.read_csv('inx_data.csv')
     return df
 
-@st.cache_data
+@st.cache_resource
 def load_model():
-    base_path = Path(__file__).resolve().parent
-    model_paths = [
-        base_path / 'xgb_model_pipeline.pkl',
-        base_path / 'xgb_model_pipeline.joblib',
-        Path('xgb_model_pipeline.pkl'),
-        Path('xgb_model_pipeline.joblib')
+    search_paths = [
+        Path(__file__).resolve().parent,
+        Path.cwd(),
     ]
-    for model_path in model_paths:
-        if model_path.exists():
-            try:
-                return joblib.load(model_path)
-            except Exception:
-                continue
-    return None
+    if sys.argv:
+        try:
+            search_paths.append(Path(sys.argv[0]).resolve().parent)
+        except Exception:
+            pass
+
+    for directory in search_paths:
+        if directory is None:
+            continue
+        for model_name in ['xgb_model_pipeline.pkl', 'xgb_model_pipeline.joblib']:
+            model_path = directory / model_name
+            if model_path.exists():
+                try:
+                    return joblib.load(model_path), model_path, None
+                except Exception as error:
+                    return None, model_path, error
+
+    return None, None, None
 
 df = load_data()
-xgb_model = load_model()
+xgb_model, xgb_model_path, model_load_error = load_model()
 
 # Display summary statistics
 st.header("Data Overview")
@@ -100,7 +109,14 @@ with tab4:
 with tab5:
     st.subheader("Hiring Model: Predict Performance Rating")
     if xgb_model is None:
-        st.warning("XGBoost model pipeline not found. Make sure `xgb_model_pipeline.pkl` exists in the project root.")
+        if model_load_error is not None and xgb_model_path is not None:
+            st.error(
+                f"A model file was found at `{xgb_model_path}` but it failed to load: {type(model_load_error).__name__}: {model_load_error}"
+            )
+        else:
+            st.warning(
+                "XGBoost model pipeline not found. Make sure `xgb_model_pipeline.pkl` or `xgb_model_pipeline.joblib` exists in the project root or the app directory."
+            )
     else:
         st.markdown(
             "This section uses the trained XGBoost performance prediction model from `inx_data.ipynb` to support hiring and HR decision-making. "
