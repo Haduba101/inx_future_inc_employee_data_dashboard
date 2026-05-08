@@ -116,7 +116,6 @@ with tab5:
             )
     else:
         st.markdown(
-            "This section uses the trained XGBoost performance prediction model from `inx_data.ipynb` to support hiring and HR decision-making. "
             "Select candidate attributes below and generate a predicted `PerformanceRating`."
         )
 
