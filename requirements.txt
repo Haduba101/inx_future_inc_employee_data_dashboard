@@ -1,0 +1,11 @@
+# The following are the packages used in the project. 
+# You can install them using pip by running the following command in your terminal:
+# pip install -r requirements.txt
+
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+tensorflow
+joblib
