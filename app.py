@@ -2,12 +2,18 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import joblib
+from pathlib import Path
 
 # Set page config
 st.set_page_config(page_title="INX Future Inc. Employee Data Dashboard", layout="wide")
 
 # Title
 st.title("INX Future Inc. Employee Data Dashboard 📈")
+st.markdown(
+    "This dashboard visualizes employee data for INX Future Inc. and includes a hiring-focused predictive model "
+    "for employee performance rating, aligned with the analysis in `inx_data.ipynb`."
+)
 
 # Load data
 @st.cache_data
@@ -15,7 +21,18 @@ def load_data():
     df = pd.read_csv('inx_data.csv')
     return df
 
+@st.cache_data
+def load_model():
+    model_path = Path('xgb_model_pipeline.pkl')
+    if model_path.exists():
+        try:
+            return joblib.load(model_path)
+        except Exception:
+            return None
+    return None
+
 df = load_data()
+xgb_model = load_model()
 
 # Display summary statistics
 st.header("Data Overview")
@@ -33,7 +50,13 @@ st.dataframe(df, width='stretch')
 st.header("Data Analysis")
 
 # Create tabs for different analyses
-tab1, tab2, tab3, tab4 = st.tabs(["Attrition Analysis", "Department Analysis", "Age Distribution", "Salary Analysis"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Attrition Analysis",
+    "Department Analysis",
+    "Age Distribution",
+    "Salary Analysis",
+    "Hiring Model"
+])
 
 with tab1:
     st.subheader("Attrition by Department")
@@ -66,6 +89,53 @@ with tab4:
     ax.set_xlabel('Department')
     ax.set_ylabel('Hourly Rate')
     st.pyplot(fig)
+
+with tab5:
+    st.subheader("Hiring Model: Predict Performance Rating")
+    if xgb_model is None:
+        st.warning("XGBoost model pipeline not found. Make sure `xgb_model_pipeline.pkl` exists in the project root.")
+    else:
+        st.markdown(
+            "This section uses the trained XGBoost performance prediction model from `inx_data.ipynb` to support hiring and HR decision-making. "
+            "Select candidate attributes below and generate a predicted `PerformanceRating`."
+        )
+
+        candidate = {
+            'Age': st.slider('Age', int(df['Age'].min()), int(df['Age'].max()), int(df['Age'].median())),
+            'DistanceFromHome': st.slider('Distance From Home', int(df['DistanceFromHome'].min()), int(df['DistanceFromHome'].max()), int(df['DistanceFromHome'].median())),
+            'EmpEducationLevel': st.slider('Education Level', int(df['EmpEducationLevel'].min()), int(df['EmpEducationLevel'].max()), int(df['EmpEducationLevel'].median())),
+            'EmpEnvironmentSatisfaction': st.slider('Environment Satisfaction', int(df['EmpEnvironmentSatisfaction'].min()), int(df['EmpEnvironmentSatisfaction'].max()), int(df['EmpEnvironmentSatisfaction'].median())),
+            'EmpHourlyRate': st.number_input('Hourly Rate', int(df['EmpHourlyRate'].min()), int(df['EmpHourlyRate'].max()), int(df['EmpHourlyRate'].median())),
+            'EmpJobInvolvement': st.slider('Job Involvement', int(df['EmpJobInvolvement'].min()), int(df['EmpJobInvolvement'].max()), int(df['EmpJobInvolvement'].median())),
+            'EmpJobLevel': st.slider('Job Level', int(df['EmpJobLevel'].min()), int(df['EmpJobLevel'].max()), int(df['EmpJobLevel'].median())),
+            'EmpJobSatisfaction': st.slider('Job Satisfaction', int(df['EmpJobSatisfaction'].min()), int(df['EmpJobSatisfaction'].max()), int(df['EmpJobSatisfaction'].median())),
+            'NumCompaniesWorked': st.slider('Number of Companies Worked', int(df['NumCompaniesWorked'].min()), int(df['NumCompaniesWorked'].max()), int(df['NumCompaniesWorked'].median())),
+            'EmpLastSalaryHikePercent': st.slider('Last Salary Hike (%)', int(df['EmpLastSalaryHikePercent'].min()), int(df['EmpLastSalaryHikePercent'].max()), int(df['EmpLastSalaryHikePercent'].median())),
+            'EmpRelationshipSatisfaction': st.slider('Relationship Satisfaction', int(df['EmpRelationshipSatisfaction'].min()), int(df['EmpRelationshipSatisfaction'].max()), int(df['EmpRelationshipSatisfaction'].median())),
+            'TotalWorkExperienceInYears': st.slider('Total Work Experience', int(df['TotalWorkExperienceInYears'].min()), int(df['TotalWorkExperienceInYears'].max()), int(df['TotalWorkExperienceInYears'].median())),
+            'TrainingTimesLastYear': st.slider('Training Times Last Year', int(df['TrainingTimesLastYear'].min()), int(df['TrainingTimesLastYear'].max()), int(df['TrainingTimesLastYear'].median())),
+            'EmpWorkLifeBalance': st.slider('Work-Life Balance', int(df['EmpWorkLifeBalance'].min()), int(df['EmpWorkLifeBalance'].max()), int(df['EmpWorkLifeBalance'].median())),
+            'ExperienceYearsAtThisCompany': st.slider('Years at Company', int(df['ExperienceYearsAtThisCompany'].min()), int(df['ExperienceYearsAtThisCompany'].max()), int(df['ExperienceYearsAtThisCompany'].median())),
+            'ExperienceYearsInCurrentRole': st.slider('Years in Current Role', int(df['ExperienceYearsInCurrentRole'].min()), int(df['ExperienceYearsInCurrentRole'].max()), int(df['ExperienceYearsInCurrentRole'].median())),
+            'YearsSinceLastPromotion': st.slider('Years Since Last Promotion', int(df['YearsSinceLastPromotion'].min()), int(df['YearsSinceLastPromotion'].max()), int(df['YearsSinceLastPromotion'].median())),
+            'YearsWithCurrManager': st.slider('Years with Current Manager', int(df['YearsWithCurrManager'].min()), int(df['YearsWithCurrManager'].max()), int(df['YearsWithCurrManager'].median())),
+            'Gender': st.selectbox('Gender', sorted(df['Gender'].dropna().unique())),
+            'EducationBackground': st.selectbox('Education Background', sorted(df['EducationBackground'].dropna().unique())),
+            'MaritalStatus': st.selectbox('Marital Status', sorted(df['MaritalStatus'].dropna().unique())),
+            'EmpDepartment': st.selectbox('Department', sorted(df['EmpDepartment'].dropna().unique())),
+            'EmpJobRole': st.selectbox('Job Role', sorted(df['EmpJobRole'].dropna().unique())),
+            'BusinessTravelFrequency': st.selectbox('Business Travel Frequency', sorted(df['BusinessTravelFrequency'].dropna().unique())),
+            'OverTime': st.selectbox('OverTime', sorted(df['OverTime'].dropna().unique())),
+        }
+
+        candidate_df = pd.DataFrame([candidate])
+        if st.button('Predict Performance Rating'):
+            prediction = xgb_model.predict(candidate_df)[0]
+            st.success(f"Predicted Performance Rating: {prediction}")
+            if hasattr(xgb_model, 'predict_proba'):
+                proba = xgb_model.predict_proba(candidate_df)[0]
+                st.write('Prediction confidence:')
+                st.write({f'Rating {cls}': f'{prob:.2%}' for cls, prob in enumerate(proba, start=1)})
 
 # Filter section
 st.header("Filter Data")
